@@ -10,5 +10,8 @@
     <?php
     echo 'I\'m php勉強中';
     ?>
+    <?php
+    echo date('G時 i分 s秒');
+    ?>
 </body>
 </html>
