@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $stmt->bind_param('s', $form['email']);
         $success = $stmt->execute();
-        if (!$succses) {
+        if (!$success) {
             die($db->error);
         }
 
@@ -115,7 +115,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php if (isset($error['email']) && $error['email'] === 'blank'): ?>
                     <p class="error">* メールアドレスを入力してください</p>
                     <?php endif; ?>
+                    <?php if (isset($error['email']) && $error['email'] === 'duplicate') : ?>
                     <p class="error">* 指定されたメールアドレスはすでに登録されています</p>
+                    <?php endif; ?>
                 <dt>パスワード<span class="required">必須</span></dt>
                 <dd>
                     <input type="password" name="password" size="10" maxlength="20" value="<?php echo h($form['password']); ?>"/>
