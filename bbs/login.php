@@ -1,4 +1,5 @@
 <?php
+session_start();
 require('library.php');
 
 $error = [];
@@ -9,7 +10,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = filter_input(INPUT_POST, 'password');
     if ($email === '' || $password === '') {
         $error['login'] = 'blank';
-    }    
+    } else {
+        $db = dbconnect();
+        $stmt = $db->prepare('select id, name, password from members where email=? limit 1');
+        if (!$stmt) {
+      die($db->error);
+    }
+    $stmt->bind_param('s', $email);
+    $success = $stmt->execute();
+    if (!$success) {
+      die($db->error);
+    }
+    $stmt->bind_result($id, $name, $hash);
+    $stmt->fetch();
+
+    if (password_verify($password, $hash)) {
+        // ログイン成功
+        session_regenerate_id();
+        $_SESSION['id'] = $id;
+        $_SESSION['name'] = $name;
+        header('Location: index.php');
+        exit();
+      } else {
+        $error['login'] = 'failed';
+      }
+    }
 }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
