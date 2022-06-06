@@ -1,5 +1,7 @@
 <?php
 session_start();
+require('../library.php');
+
 $form = [
     'name' => '',
     'email' => '',
@@ -7,10 +9,6 @@ $form = [
 ];
 $error = [];
 
-/* htmlspecialcharasを短くする*/
-function h($value) {
-    return htmlspecialchars($value, ENT_QUOTES);
-}
 
 /*フォーム内容をチェック */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -27,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $form['password'] = filter_input(INPUT_POST, 'password');
     if ($form['password'] === '') {
         $error['password'] = 'blank';
-    } elseif (strlen($form['password']) < 4){
+    } else if (strlen($form['password']) < 4) {
         $error['password'] = 'length';
     }
 
@@ -35,17 +33,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $image = $_FILES['image'];
     if ($image['name'] !== '' && $image['error'] === 0) {
         $type = mime_content_type($image['tmp_name']);
+        var_dump($type);
         if ($type !== 'image/png' && $type !== 'image/jpeg') {
             $error['image'] = 'type';
         }
     }
     
     if (empty($error)) {
-        $_SESSIION['form'] = $form;
+        $_SESSION['form'] = $form;
 
         /*画像のアップロード*/
-        $filename = date('YmdHis') . '_' . $image['name'];
-        move_uploaded_file($image['tmp_name'], '..//member_picuture/' . $filename);
+        if ($image['name'] !== '') {
+            $filename = date('YmdHis') . '_' . $image['name'];
+            if (!move_uploaded_file($image['tmp_name'], '../member_picture/' . $filename)) {
+                die('ファイルアップロード失敗しました。');
+            } 
+            $_SESSION['form']['image'] = $filename;
+        } else {
+            $_SESSION['form']['image'] = '';
+        }
 
         header('Location: check.php');
         exit();
